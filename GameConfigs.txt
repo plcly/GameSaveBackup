@@ -1,7 +1,0 @@
-﻿[{
-	"DisplayName": "SIFU",
-	"GameName": "Sifu",//This is Game process name.
-	"SavePath": "C:\\Users\\xxx\\AppData\\Local\\Sifu\\Saved\\SaveGames\\xxx",
-	"BackupPath": "D:\\game\\SaveBackup\\Sifu",
-	"BackupType": 1 //0 File, 1 Folder
-}]
