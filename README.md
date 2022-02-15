@@ -15,6 +15,9 @@ Add GameConfigs.txt
 >	"BackupType": 1 //0 File, 1 Folder
 >}]
 
+NumPad4 is save
+
+NumPad6 is load
 
 Reference:
 
