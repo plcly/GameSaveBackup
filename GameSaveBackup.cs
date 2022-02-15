@@ -142,7 +142,7 @@ namespace GameSaveBackup
                 var txt = File.ReadAllText("GameConfigs.txt");
                 try
                 {
-                    var list = JsonConvert.DeserializeObject(txt);
+                    var list = JsonConvert.DeserializeObject<List<ConfigModel>>(txt);
                     gameListBox.DataSource = list;
                     gameListBox.DisplayMember = "DisplayName";
                     gameListBox.ValueMember = "GameName";
@@ -154,7 +154,7 @@ namespace GameSaveBackup
             }
             else
             {
-                MessageBox.Show("Config is miss.");
+                MessageBox.Show("[GameConfigs.txt] is miss.");
             }
         }
 
