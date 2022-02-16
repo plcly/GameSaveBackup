@@ -137,25 +137,35 @@ namespace GameSaveBackup
 
         private void LoadConfigs()
         {
-            if (File.Exists("GameConfigs.txt"))
+            try
             {
-                var txt = File.ReadAllText("GameConfigs.txt");
-                try
+                var currentFolder = typeof(Program).Assembly.Location;
+                var configFile = Path.GetDirectoryName(currentFolder) + "\\" + "GameConfigs.txt";
+                if (File.Exists(configFile))
                 {
-                    var list = JsonConvert.DeserializeObject<List<ConfigModel>>(txt);
-                    gameListBox.DataSource = list;
-                    gameListBox.DisplayMember = "DisplayName";
-                    gameListBox.ValueMember = "GameName";
+                    var txt = File.ReadAllText(configFile);
+                    try
+                    {
+                        var list = JsonConvert.DeserializeObject<List<ConfigModel>>(txt);
+                        gameListBox.DataSource = list;
+                        gameListBox.DisplayMember = "DisplayName";
+                        gameListBox.ValueMember = "GameName";
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    MessageBox.Show(ex.Message);
+                    MessageBox.Show($"[{configFile}] is miss.");
                 }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("[GameConfigs.txt] is miss.");
+                MessageBox.Show(ex.Message);
             }
+            
         }
 
         private void GameSaveBackup_FormClosing(object sender, FormClosingEventArgs e)
