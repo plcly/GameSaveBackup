@@ -16,96 +16,89 @@ namespace GameSaveBackup
 {
     public partial class GameSaveBackup : Form
     {
-        private HotKeyManager hotKeyManager;
-        private ConfigModel gameItem;
+        private HotKeyManager _hotKeyManager;
+        private ConfigModel _gameItem;
+
+        private Key _saveKey;
+        private Key _loadKey;
+
         public GameSaveBackup()
         {
             InitializeComponent();
-            hotKeyManager = new HotKeyManager();
+            _hotKeyManager = new HotKeyManager();
             LoadConfigs();
         }
 
-       
-
         private void btnRegist_Click(object sender, EventArgs e)
         {
-            if (CheckGameRunning())
-            {
-                var hotKeySave = hotKeyManager.Register(Key.NumPad4, System.Windows.Input.ModifierKeys.None);
-                var hotKeyLoad = hotKeyManager.Register(Key.NumPad6, System.Windows.Input.ModifierKeys.None);
-
-                hotKeyManager.KeyPressed += HotKeyManagerPressed;
-
-                btnRegist.Enabled = false;
-            }
-            else
-            {
-                MessageBox.Show("Game is not running!");
-            }
-        }
-
-        private bool CheckGameRunning()
-        {
             var item = gameListBox.SelectedItem;
-            if (item == null) return false;
-            gameItem = (ConfigModel)item;
-            return true; 
-            //var gameProcesses = System.Diagnostics.Process.GetProcessesByName(gameItem.GameName + ".exe");
-            //if (gameProcesses.Length<=0)
-            //{
-            //   return false;
-            //}
-            //return true; 
+            if (item == null)
+            {
+                MessageBox.Show("请先选择游戏");
+                return;
+            }
+            _gameItem = (ConfigModel)item;
+
+            _saveKey = _gameItem.SaveKey;
+            _loadKey = _gameItem.LoadKey;
+
+            var hotKeySave = _hotKeyManager.Register(_saveKey, System.Windows.Input.ModifierKeys.None);
+            var hotKeyLoad = _hotKeyManager.Register(_loadKey, System.Windows.Input.ModifierKeys.None);
+
+            _hotKeyManager.KeyPressed += HotKeyManagerPressed;
+
+            btnRegist.Enabled = false;
+            if (chkRegistBackup.Checked)
+            {
+                SaveGame();
+            }
+
         }
 
         private void HotKeyManagerPressed(object sender, KeyPressedEventArgs e)
         {
-            if (gameItem!=null)
+            if (_gameItem != null)
             {
-                if (e.HotKey.Key == Key.NumPad4)//Save
+                if (e.HotKey.Key == _saveKey)//Save
                 {
-                    switch (gameItem.BackupType)
-                    {
-                        case BackType.File:
-                            SaveGameAsFile();
-                            break;
-                        case BackType.Folder:
-                            SaveGameAsFolder();
-                            break;
-                        default:
-                            break;
-                    }
+                    SaveGame();
                 }
-                else if (e.HotKey.Key == Key.NumPad6)//Load
+                else if (e.HotKey.Key == _loadKey)//Load
                 {
-                    switch (gameItem.BackupType)
-                    {
-                        case BackType.File:
-                            LoadGameAsFile();
-                            break;
-                        case BackType.Folder:
-                            LoadGameAsFolder();
-                            break;
-                        default:
-                            break;
-                    }
+                    LoadGame();
                 }
             }
-            
+
+        }
+
+        private void LoadGame()
+        {
+            switch (_gameItem.BackupType)
+            {
+                case BackType.File:
+                    LoadGameAsFile();
+                    break;
+                case BackType.Folder:
+                    LoadGameAsFolder();
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void LoadGameAsFolder()
         {
-            var folderInfo=new DirectoryInfo(gameItem.BackupPath);
+            var folderInfo = new DirectoryInfo(_gameItem.BackupPath);
             if (folderInfo.Exists)
             {
-                var lastFolder = folderInfo.GetDirectories().OrderByDescending(p=>p.LastWriteTime).FirstOrDefault();
-                if (lastFolder!=null)
+                var lastFolder = folderInfo.GetDirectories().OrderByDescending(p => p.LastWriteTime).FirstOrDefault();
+                if (lastFolder != null)
                 {
                     foreach (var file in lastFolder.GetFiles())
                     {
-                        File.Copy(file.FullName, gameItem.SavePath+"\\"+file.Name,true);
+                        File.Copy(file.FullName, _gameItem.SavePath + "\\" + file.Name, true);
                     }
+                    ShowMessage("Loaded");
                 }
             }
         }
@@ -114,22 +107,40 @@ namespace GameSaveBackup
         {
         }
 
+        private void SaveGame()
+        {
+            switch (_gameItem.BackupType)
+            {
+                case BackType.File:
+                    SaveGameAsFile();
+                    break;
+                case BackType.Folder:
+                    SaveGameAsFolder();
+                    break;
+                default:
+                    break;
+            }
+        }
         private void SaveGameAsFolder()
         {
-            if (!Directory.Exists(gameItem.BackupPath))
+            if (!Directory.Exists(_gameItem.BackupPath))
             {
-                Directory.CreateDirectory(gameItem.BackupPath); 
+                Directory.CreateDirectory(_gameItem.BackupPath);
             }
-            var newFolderName = gameItem.BackupPath+"\\" + DateTime.Now.ToString("yyyyMMdd-HH-mm-ss");
+            var newFolderName = _gameItem.BackupPath + "\\" + DateTime.Now.ToString("yyyyMMdd-HH-mm-ss");
             if (!Directory.Exists(newFolderName))
             {
                 Directory.CreateDirectory(newFolderName);
             }
-            foreach (var file in Directory.GetFiles(gameItem.SavePath))
+            foreach (var file in Directory.GetFiles(_gameItem.SavePath))
             {
-                File.Copy(file, newFolderName+"\\"+Path.GetFileName(file), true);
+                File.Copy(file, newFolderName + "\\" + Path.GetFileName(file), true);
             }
+            ShowMessage("Saved");
+            
         }
+
+        
 
         private void SaveGameAsFile()
         {
@@ -165,12 +176,22 @@ namespace GameSaveBackup
             {
                 MessageBox.Show(ex.Message);
             }
+
+        }
+
+        private void ShowMessage(string msg)
+        {
+            if (chkShowMsg.Checked)
+            {
+                MessageBox.Show(msg, msg, MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1
+                , MessageBoxOptions.ServiceNotification);
+            }
             
         }
 
         private void GameSaveBackup_FormClosing(object sender, FormClosingEventArgs e)
         {
-            hotKeyManager.Dispose(); 
+            _hotKeyManager.Dispose();
         }
     }
 }
