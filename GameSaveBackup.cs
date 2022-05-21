@@ -18,6 +18,8 @@ namespace GameSaveBackup
     {
         private HotKeyManager _hotKeyManager;
         private ConfigModel _gameItem;
+        private System.Media.SoundPlayer _playerLoad;
+        private System.Media.SoundPlayer _playerSave;
 
         private Key _saveKey;
         private Key _loadKey;
@@ -26,6 +28,11 @@ namespace GameSaveBackup
         {
             InitializeComponent();
             _hotKeyManager = new HotKeyManager();
+            _playerLoad = new System.Media.SoundPlayer();
+            _playerSave = new System.Media.SoundPlayer();
+            var path = Path.GetDirectoryName(Application.ExecutablePath);
+            _playerLoad.SoundLocation = Path.Combine(path, "load.wav");
+            _playerSave.SoundLocation = Path.Combine(path, "save.wav");
             LoadConfigs();
         }
 
@@ -99,6 +106,7 @@ namespace GameSaveBackup
                         File.Copy(file.FullName, _gameItem.SavePath + "\\" + file.Name, true);
                     }
                     ShowMessage("Loaded");
+                    _playerLoad.Play();
                 }
             }
         }
@@ -132,15 +140,20 @@ namespace GameSaveBackup
             {
                 Directory.CreateDirectory(newFolderName);
             }
+            if (!Directory.Exists(_gameItem.SavePath))
+            {
+                Directory.CreateDirectory(_gameItem.SavePath);
+            }
             foreach (var file in Directory.GetFiles(_gameItem.SavePath))
             {
                 File.Copy(file, newFolderName + "\\" + Path.GetFileName(file), true);
             }
             ShowMessage("Saved");
-            
+            _playerSave.Play();
+
         }
 
-        
+
 
         private void SaveGameAsFile()
         {
@@ -186,7 +199,7 @@ namespace GameSaveBackup
                 MessageBox.Show(msg, msg, MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1
                 , MessageBoxOptions.ServiceNotification);
             }
-            
+
         }
 
         private void GameSaveBackup_FormClosing(object sender, FormClosingEventArgs e)
