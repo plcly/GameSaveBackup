@@ -101,10 +101,7 @@ namespace GameSaveBackup
                 var lastFolder = folderInfo.GetDirectories().OrderByDescending(p => p.LastWriteTime).FirstOrDefault();
                 if (lastFolder != null)
                 {
-                    foreach (var file in lastFolder.GetFiles())
-                    {
-                        File.Copy(file.FullName, _gameItem.SavePath + "\\" + file.Name, true);
-                    }
+                    CopyDirectory(lastFolder.FullName, _gameItem.SavePath, true);
                     ShowMessage("Loaded");
                     _playerLoad.Play();
                 }
@@ -144,16 +141,44 @@ namespace GameSaveBackup
             {
                 Directory.CreateDirectory(_gameItem.SavePath);
             }
-            foreach (var file in Directory.GetFiles(_gameItem.SavePath))
-            {
-                File.Copy(file, newFolderName + "\\" + Path.GetFileName(file), true);
-            }
+            CopyDirectory(_gameItem.SavePath, newFolderName, true);
             ShowMessage("Saved");
             _playerSave.Play();
 
         }
 
+        static void CopyDirectory(string sourceDir, string destinationDir, bool recursive)
+        {
+            // Get information about the source directory
+            var dir = new DirectoryInfo(sourceDir);
 
+            // Check if the source directory exists
+            if (!dir.Exists)
+                throw new DirectoryNotFoundException($"Source directory not found: {dir.FullName}");
+
+            // Cache directories before we start copying
+            DirectoryInfo[] dirs = dir.GetDirectories();
+
+            // Create the destination directory
+            Directory.CreateDirectory(destinationDir);
+
+            // Get the files in the source directory and copy to the destination directory
+            foreach (FileInfo file in dir.GetFiles())
+            {
+                string targetFilePath = Path.Combine(destinationDir, file.Name);
+                file.CopyTo(targetFilePath, true);
+            }
+
+            // If recursive and copying subdirectories, recursively call this method
+            if (recursive)
+            {
+                foreach (DirectoryInfo subDir in dirs)
+                {
+                    string newDestinationDir = Path.Combine(destinationDir, subDir.Name);
+                    CopyDirectory(subDir.FullName, newDestinationDir, true);
+                }
+            }
+        }
 
         private void SaveGameAsFile()
         {
