@@ -4,8 +4,8 @@
 	"SavePath": "C:\\temp\\GameSavePath",
 	"BackupPath": "C:\\temp\\GameBackupPath",
 	"BackupType": 1, //0 File, 1 Folder
-	"LoadKey": "D6",
-	"SaveKey": "D7"
+	"LoadKey": "F7",
+	"SaveKey": "F8"
 }]
 //None = 0,
 //Cancel = 1,
