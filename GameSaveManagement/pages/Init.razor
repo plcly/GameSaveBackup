@@ -1,0 +1,32 @@
+﻿@page "/"
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+
+
+<MudStack Class="pa-12">
+    <MudText Typo="Typo.h5">请输入</MudText>
+    <MudTextField Label="Key" @bind-Value="key" T="string" OnKeyUp="Keyup" tabindex="0"></MudTextField>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-10 rounded-lg" @onclick="Confirmed">确定</MudButton>
+</MudStack>
+@code {
+    private string key;
+    private void Confirmed()
+    {
+        try
+        {
+            Navigation.NavigateTo("/ServerList");
+        }
+        catch (Exception ex)
+        {
+            DialogService.ShowMessageBox("Warning!", ex.Message);
+        }
+    }
+
+    private void Keyup(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            Confirmed();
+        }
+    }
+}

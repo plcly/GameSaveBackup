@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameSaveBackup", "GameSaveBackup.csproj", "{0B4C4D80-1A92-4475-9E91-A0067043B14F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameSaveManagement", "GameSaveManagement\GameSaveManagement.csproj", "{E04A3F35-8020-46E0-B3D5-BBE1D9ED2DED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{0B4C4D80-1A92-4475-9E91-A0067043B14F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B4C4D80-1A92-4475-9E91-A0067043B14F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B4C4D80-1A92-4475-9E91-A0067043B14F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E04A3F35-8020-46E0-B3D5-BBE1D9ED2DED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E04A3F35-8020-46E0-B3D5-BBE1D9ED2DED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E04A3F35-8020-46E0-B3D5-BBE1D9ED2DED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E04A3F35-8020-46E0-B3D5-BBE1D9ED2DED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
