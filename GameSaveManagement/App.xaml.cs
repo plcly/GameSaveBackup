@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using GameSaveManagement.Services;
+using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
 using System;
 using System.Collections.Generic;
@@ -17,9 +18,13 @@ namespace GameSaveManagement
     {
         protected override void OnStartup(StartupEventArgs e)
         {
+            var gameService = new GameService();
+
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddWpfBlazorWebView();
             serviceCollection.AddMudServices();
+            serviceCollection.AddSingleton<IServiceCollection>(serviceCollection);
+            serviceCollection.AddSingleton<GameService>(gameService);
             var provider = serviceCollection.BuildServiceProvider();
             Resources.Add("services", provider);
         }

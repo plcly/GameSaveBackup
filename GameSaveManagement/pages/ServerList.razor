@@ -1,9 +1,39 @@
-﻿@page "/ServerList"
-@inject IDialogService DialogService
+﻿@page "/ServerList/{GameModelId}"
 
-<MudText Typo="Typo.h1">ServerList</MudText>
 
-@code{
+<MudStack Row>
+    <MudText Typo="Typo.h5" Class="ma-3">保存快捷键：@Model.GameSaveHotKey</MudText>
+    <MudButton Class="ma-3" Variant="Variant.Filled" Color="Color.Primary" OnClick="() => OpenFolder(Model.GameBackupPath)">打开备份存档目录</MudButton>
+</MudStack>
 
-}
+<MudStack Row>
+    <MudText Typo="Typo.h5" Class="ma-3">读取快捷键：@Model.GameLoadHotKey</MudText>
+    <MudButton Class="ma-3" Variant="Variant.Filled" Color="Color.Primary" OnClick="() => OpenFolder(Model.GameSavePath)">打开游戏存档目录</MudButton>
+</MudStack>
+
+
+<MudTimeline TimelinePosition="TimelinePosition.Start">
+    @foreach (var game in Model.Details)
+    {
+        <MudTimelineItem Color="Color.Success" Variant="Variant.Outlined">
+            <MudStack Row class="mr-12">
+                <MudIcon Icon="@Icons.Material.Outlined.FileCopy"></MudIcon>
+                <MudText>@game.Value</MudText>
+                <MudSpacer />
+                <MudTooltip Text="重命名">
+                    <MudIconButton Icon="@Icons.Material.Filled.Create" Color="Color.Info" Size="Size.Small"></MudIconButton>
+                </MudTooltip>
+                <MudTooltip Text="覆盖">
+                    <MudIconButton OnClick="()=>LoadGameByPath(game.Key)" Icon="@Icons.Material.Filled.PartyMode" Color="Color.Success" Size="Size.Small"></MudIconButton>
+                </MudTooltip>
+                <MudTooltip Text="删除">
+                    <MudIconButton OnClick="()=>DeleteFolder(game.Key)" Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small"></MudIconButton>
+                </MudTooltip>
+            </MudStack>
+
+        </MudTimelineItem>
+    }
+</MudTimeline>
+
+
 

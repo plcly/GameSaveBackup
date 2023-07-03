@@ -1,20 +1,77 @@
 ﻿@page "/"
 @inject NavigationManager Navigation
 @inject IDialogService DialogService
+@inject GameService _service
 
 
-<MudStack Class="pa-12">
-    <MudText Typo="Typo.h5">请输入</MudText>
-    <MudTextField Label="Key" @bind-Value="key" T="string" OnKeyUp="Keyup" tabindex="0"></MudTextField>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-10 rounded-lg" @onclick="Confirmed">确定</MudButton>
-</MudStack>
+<MudGrid Class="pa-12">
+    <MudItem xs="4">
+        <MudStack>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddNew">新增</MudButton>
+            <MudList Clickable="true" @ref="savedGameListCon" @bind-SelectedValue="selectedValue" Class="overflow-y-scroll">
+                @foreach (var model in gameModels)
+                {
+                    <MudListItem Value="@model">
+                        <div Class="d-flex">
+                            <MudImage Class="d-inline align-self-center" Src="@model.GameIconPath" Height="32" Width="32"></MudImage>
+                            <MudText Class="d-inline ml-3 align-self-center">@model.GameName</MudText>
+                        </div>
+                    </MudListItem>
+                }
+            </MudList>
+        </MudStack>
+    </MudItem>
+    <MudItem xs="8">
+        <MudText Typo="Typo.h5">游戏信息</MudText>
+        <MudTextField Label="图标路径" @bind-Value="selectModel.GameIconPath" T="string"></MudTextField>
+        <MudTextField Label="游戏名称" @bind-Value="selectModel.GameName" T="string" ></MudTextField>
+        <MudTextField Label="游戏路径" @bind-Value="selectModel.GameFullPath" T="string"></MudTextField>
+        <MudTextField Label="存档目录" @bind-Value="selectModel.GameSavePath" T="string"></MudTextField>
+        <MudTextField Label="备份目录" @bind-Value="selectModel.GameBackupPath" T="string" ></MudTextField>
+        <MudGrid >
+            <MudItem xs="6">
+                <MudTextField Label="保存存档快捷键" T="string" @bind-Value="selectModel.GameSaveHotKey"></MudTextField>
+            </MudItem>
+            <MudItem xs="6">
+                <MudTextField Label="读取存档快捷键" T="string" @bind-Value="selectModel.GameLoadHotKey"></MudTextField>
+            </MudItem>
+        </MudGrid>
+        <MudGrid Class="mt-10">
+            <MudItem xs="6">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="rounded-lg" OnClick="Save">保存</MudButton>
+            </MudItem>
+            <MudItem xs="6">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="rounded-lg" OnClick="Run">启动</MudButton>
+            </MudItem>
+        </MudGrid>
+        
+    </MudItem>
+</MudGrid>
 @code {
     private string key;
-    private void Confirmed()
+    private MudList savedGameListCon;
+    private List<GameModel> gameModels;
+    private object selectedValue;
+    private GameModel selectModel => selectedValue as GameModel ?? new GameModel();
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        gameModels = _service.GetAll().ToList();
+    }
+
+    private async Task Save()
     {
         try
         {
-            Navigation.NavigateTo("/ServerList");
+            var id = _service.InsertOrUpdate(selectModel);
+            if (id > 0)
+            {
+                await RefreshPage();
+            }
         }
         catch (Exception ex)
         {
@@ -22,11 +79,27 @@
         }
     }
 
-    private void Keyup(KeyboardEventArgs e)
+
+    private async Task RefreshPage()
     {
-        if (e.Key == "Enter")
+        await InvokeAsync(() =>
         {
-            Confirmed();
+            gameModels = _service.GetAll().ToList();
+            StateHasChanged();
+        });
+    }
+
+    private async Task AddNew()
+    {
+        selectedValue = new GameModel();
+    }
+
+    private async Task Run()
+    {
+        if (selectedValue != null && selectModel.Id > 0)
+        {
+            Navigation.NavigateTo($"/ServerList/{selectModel.Id}");
         }
     }
+
 }

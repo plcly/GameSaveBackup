@@ -1,16 +1,41 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net7.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <UseWPF>true</UseWPF>
-	  <RootNamespace>GameSaveManagement</RootNamespace>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net7.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<RootNamespace>GameSaveManagement</RootNamespace>
+		<ApplicationIcon>Resource\game.ico</ApplicationIcon>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Wpf" Version="7.0.86" />
-    <PackageReference Include="MudBlazor" Version="6.5.0" />
-  </ItemGroup>
+	<ItemGroup>
+	  <Content Remove="wwwroot\game.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Resource\game.ico">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="wwwroot\game.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="GlobalHotKey" Version="1.1.0" />
+		<PackageReference Include="LiteDB" Version="5.0.16" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebView.Wpf" Version="7.0.86" />
+		<PackageReference Include="MudBlazor" Version="6.5.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Resource\game.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
 
 </Project>
