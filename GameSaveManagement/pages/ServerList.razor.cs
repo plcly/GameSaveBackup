@@ -75,7 +75,14 @@ namespace GameSaveManagement.pages
                 }
 
                 _hotKeyManager.KeyPressed += HotKeyManagerPressed;
-
+                if (!string.IsNullOrEmpty(Model.GameFullPath))
+                {
+                    var info =new ProcessStartInfo(Model.GameFullPath);
+                    info.CreateNoWindow = true;
+                    info.UseShellExecute = false;
+                    info.WorkingDirectory = System.IO.Path.GetDirectoryName(Model.GameFullPath);
+                    using Process process = Process.Start(info);
+                }
             }
         }
 
