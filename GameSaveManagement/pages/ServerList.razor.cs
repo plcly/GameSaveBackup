@@ -15,6 +15,7 @@ using System.Windows.Input;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Windows.Shapes;
 
 namespace GameSaveManagement.pages
 {
@@ -23,6 +24,11 @@ namespace GameSaveManagement.pages
         private HotKeyManager _hotKeyManager;
         private HotKey _saveHotKey;
         private HotKey _loadHotKey;
+        private bool visible;
+        private string renameTxtField;
+        private string hotKeyStr;
+
+        private string folderToBeRenamed;
 
         [Parameter]
         public string GameModelId { get; set; }
@@ -31,6 +37,9 @@ namespace GameSaveManagement.pages
         public GameService Service { get; set; }
         [Inject]
         public NavigationManager Navigation { get; set; }
+
+        [Inject]
+        public IDialogService MudDialogService { get; set; }
 
         public GameModel Model { get; set; }
 
@@ -48,13 +57,12 @@ namespace GameSaveManagement.pages
             await base.OnParametersSetAsync();
             if (int.TryParse(GameModelId, out int modelId))
             {
-                Model = Service.GetModelById(modelId);
+                _hotKeyManager = new HotKeyManager();
+                Model = InitByModelId(modelId);
                 if (Model == null)
                 {
                     return;
                 }
-                Service.InitModel(Model);
-                _hotKeyManager = new HotKeyManager();
                 if (!string.IsNullOrEmpty(Model.GameSaveHotKey)
                     && Enum.TryParse<Key>(Model.GameSaveHotKey, out Key saveKey))
                 {
@@ -83,6 +91,7 @@ namespace GameSaveManagement.pages
         {
             await InvokeAsync(() =>
             {
+                Model = InitByModelId(Model.Id);
                 StateHasChanged();
             });
         }
@@ -92,27 +101,37 @@ namespace GameSaveManagement.pages
             if (e.HotKey.Key == _saveHotKey.Key)//Save
             {
                 Service.SaveGame(Model);
+                RefreshPage().Wait();
             }
             else if (e.HotKey.Key == _loadHotKey.Key)//Load
             {
                 Service.LoadGame(Model, null);
             }
+            else
+            {
+                if (Model.GameDetails.Where(p => p.HotKey != null).Any(p => p.HotKey.Equals(e.HotKey)))
+                {
+                    var detail = Model.GameDetails.Where(p => p.HotKey != null).FirstOrDefault(p => p.HotKey.Equals(e.HotKey));
+                    var fullPath = System.IO.Path.Combine(Model.GameBackupPath, detail.FolderName);
+                    Service.LoadGame(Model, fullPath);
+                }
+            }
         }
 
         private void LoadGameByPath(string path)
         {
-            var fullPath = Path.Combine(Model.GameBackupPath, path);
+            var fullPath = System.IO.Path.Combine(Model.GameBackupPath, path);
             Service.LoadGame(Model, fullPath);
         }
 
         private async void DeleteFolder(string path)
         {
-            var fullPath = Path.Combine(Model.GameBackupPath, path);
+            var fullPath = System.IO.Path.Combine(Model.GameBackupPath, path);
             if (Directory.Exists(fullPath))
             {
                 Directory.Delete(fullPath, true);
             }
-            Service.InitModel(Model);
+
             await RefreshPage();
         }
 
@@ -120,6 +139,87 @@ namespace GameSaveManagement.pages
         {
             _hotKeyManager.Dispose();
         }
+
+        private void OpenDialog(string folderName)
+        {
+            renameTxtField = string.Empty;
+            hotKeyStr = string.Empty;
+            folderToBeRenamed = folderName;
+            visible = true;
+        }
+        private async void RenameFolder()
+        {
+            if (!string.IsNullOrEmpty(folderToBeRenamed)
+                && (!string.IsNullOrEmpty(renameTxtField) || !string.IsNullOrEmpty(hotKeyStr)))
+            {
+                var fullPath = System.IO.Path.Combine(Model.GameBackupPath, folderToBeRenamed);
+                if (!Directory.Exists(fullPath))
+                {
+                    return;
+                }
+                var pathRenamed = string.IsNullOrEmpty(renameTxtField) ? folderToBeRenamed : renameTxtField;
+
+                if (hotKeyStr == Model.GameSaveHotKey || hotKeyStr == Model.GameLoadHotKey
+                    || Model.GameDetails.Where(p => p.HotKey != null).Any(p => p.HotKey.Key.ToString() == hotKeyStr))
+                {
+                    MudDialogService.ShowMessageBox("错误", "快捷键重复", yesText: "确定");
+                    return;
+                }
+                var hotKeyExist = Enum.TryParse<Key>(hotKeyStr, out Key hotKey);
+
+                var fullPathRenamed = System.IO.Path.Combine(Model.GameBackupPath, pathRenamed);
+
+                if (!string.IsNullOrEmpty(renameTxtField))
+                {
+                    Directory.Move(fullPath, fullPathRenamed);
+                }
+
+                var gameDetail = Model.GameDetails.FirstOrDefault(p => p.FolderName == folderToBeRenamed);
+                if (gameDetail == null)
+                {
+                    Model.GameDetails.Add(new GameDetail
+                    {
+                        FolderName = pathRenamed,
+                        HotKey = hotKeyExist ? new HotKey { Key = hotKey, Modifiers = System.Windows.Input.ModifierKeys.None } : null,
+                        HotKeyStr = hotKeyStr
+                    });
+                }
+                else
+                {
+                    gameDetail.FolderName = pathRenamed;
+                    if (hotKeyExist)
+                    {
+                        if (gameDetail.HotKey != null)
+                        {
+                            gameDetail.HotKey.Key = hotKey;
+                            gameDetail.HotKeyStr = hotKeyStr;
+                        }
+                        else
+                        {
+                            gameDetail.HotKey = new HotKey { Key = hotKey, Modifiers = System.Windows.Input.ModifierKeys.None };
+                            gameDetail.HotKeyStr = hotKeyStr;
+                        }
+                    }
+                }
+                Service.InsertOrUpdate(Model);
+                InitByModelId(Model.Id);
+                await RefreshPage();
+            }
+            visible = false;
+        }
+
+        private GameModel InitByModelId(int id)
+        {
+            Model = Service.InitModelById(id);
+            var hasHotKeyDetails = Model.GameDetails.Where(p => p.HotKey != null);
+            foreach (var detail in hasHotKeyDetails)
+            {
+                _hotKeyManager.Unregister(detail.HotKey);
+                _hotKeyManager.Register(detail.HotKey);
+            }
+            return Model;
+        }
+
         public void Dispose()
         {
             Navigation.LocationChanged -= HandleLocationChanged;

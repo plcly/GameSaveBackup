@@ -9,16 +9,21 @@ using System.Threading.Tasks;
 using static MudBlazor.CategoryTypes;
 using System.Windows.Input;
 using GlobalHotKey;
+using System.Runtime.InteropServices;
 
 namespace GameSaveManagement.Services
 {
     public class GameService
     {
         private LiteDbService _liteDb;
+        private string _loadWav;
+        private string _saveWav;
 
         public GameService()
         {
             _liteDb = new LiteDbService();
+            _loadWav = Path.Combine(Directory.GetCurrentDirectory(), "load.wav");
+            _saveWav = Path.Combine(Directory.GetCurrentDirectory(), "save.wav");
         }
 
         public IEnumerable<GameModel> GetAll()
@@ -37,11 +42,6 @@ namespace GameSaveManagement.Services
                 _liteDb.Insert(model);
             }
             return model.Id;
-        }
-
-        public GameModel GetModelById(int modelId)
-        {
-            return _liteDb.GetModelById(modelId);
         }
 
         private void CopyDirectory(string sourceDir, string destinationDir, bool recursive)
@@ -77,11 +77,16 @@ namespace GameSaveManagement.Services
             }
         }
 
-        public void InitModel(GameModel model)
+        public GameModel InitModelById(int modelId)
         {
-            if (model.Details == null)
+            var model = _liteDb.GetModelById(modelId);
+            if (model == null)
             {
-                model.Details = new Dictionary<string, string>();
+                return model;
+            }
+            if (model.GameDetails == null)
+            {
+                model.GameDetails = new List<GameDetail>();
             }
 
             if (!Directory.Exists(model.GameBackupPath))
@@ -94,22 +99,27 @@ namespace GameSaveManagement.Services
             {
                 var folders = folderInfo.GetDirectories().OrderByDescending(p => p.LastWriteTime);
 
-                var notExistsFolders = model.Details.Where(p => !folders.Any(q => q.Name == p.Value)).Select(p => p.Key).ToList();
+                var notExistsFolders = model.GameDetails.Where(p => !folders.Any(q => q.Name == p.FolderName)).Select(p => p.FolderName).ToList();
 
-                notExistsFolders.ForEach(p => model.Details.Remove(p));
+                notExistsFolders.ForEach(p => model.GameDetails.RemoveAll(q => q.FolderName == p));
 
                 _liteDb.Update(model);
+
+                model.DisplayDetails = new List<GameDetail>();
+                model.GameDetails.ForEach(p => model.DisplayDetails.Add(p));
 
                 var top10Folders = folders.Take(10);
                 foreach (var folder in top10Folders)
                 {
-                    if (model.Details.ContainsKey(folder.Name))
+                    if (model.DisplayDetails.Any(p => p.FolderName == folder.Name))
                     {
                         continue;
                     }
-                    model.Details.Add(folder.Name, folder.Name);
+                    model.DisplayDetails.Add(new GameDetail { FolderName = folder.Name});
                 }
             }
+
+            return model;
         }
 
         public void SaveGame(GameModel model)
@@ -128,6 +138,7 @@ namespace GameSaveManagement.Services
                 return;
             }
             CopyDirectory(model.GameSavePath, newFolderName, true);
+            PlaySound(_saveWav, new System.IntPtr(), PlaySoundFlags.SND_SYNC);
         }
 
         public void LoadGame(GameModel model, string path = null)
@@ -151,8 +162,25 @@ namespace GameSaveManagement.Services
                 if (backupFolder != null)
                 {
                     CopyDirectory(backupFolder.FullName, model.GameSavePath, true);
+                    PlaySound(_loadWav, new System.IntPtr(), PlaySoundFlags.SND_SYNC);
                 }
             }
+        }
+
+        [DllImport("winmm.DLL", EntryPoint = "PlaySound", SetLastError = true, CharSet = CharSet.Unicode, ThrowOnUnmappableChar = true)]
+        private static extern bool PlaySound(string szSound, System.IntPtr hMod, PlaySoundFlags flags);
+
+        [System.Flags]
+        public enum PlaySoundFlags : int
+        {
+            SND_SYNC = 0x0000,
+            SND_ASYNC = 0x0001,
+            SND_NODEFAULT = 0x0002,
+            SND_LOOP = 0x0008,
+            SND_NOSTOP = 0x0010,
+            SND_NOWAIT = 0x00002000,
+            SND_FILENAME = 0x00020000,
+            SND_RESOURCE = 0x00040004
         }
     }
 }

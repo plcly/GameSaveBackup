@@ -30,10 +30,10 @@
         <MudTextField Label="备份目录" @bind-Value="selectModel.GameBackupPath" T="string" ></MudTextField>
         <MudGrid >
             <MudItem xs="6">
-                <MudTextField Label="保存存档快捷键" T="string" @bind-Value="selectModel.GameSaveHotKey"></MudTextField>
+                <MudTextField Label="快速保存存档快捷键" T="string" @bind-Value="selectModel.GameSaveHotKey"></MudTextField>
             </MudItem>
             <MudItem xs="6">
-                <MudTextField Label="读取存档快捷键" T="string" @bind-Value="selectModel.GameLoadHotKey"></MudTextField>
+                <MudTextField Label="快速读取存档快捷键" T="string" @bind-Value="selectModel.GameLoadHotKey"></MudTextField>
             </MudItem>
         </MudGrid>
         <MudGrid Class="mt-10">
@@ -44,7 +44,6 @@
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="rounded-lg" OnClick="Run">启动</MudButton>
             </MudItem>
         </MudGrid>
-        
     </MudItem>
 </MudGrid>
 @code {
@@ -53,8 +52,6 @@
     private List<GameModel> gameModels;
     private object selectedValue;
     private GameModel selectModel => selectedValue as GameModel ?? new GameModel();
-
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -98,7 +95,7 @@
     {
         if (selectedValue != null && selectModel.Id > 0)
         {
-            Navigation.NavigateTo($"/ServerList/{selectModel.Id}");
+            Navigation.NavigateTo($"/GameList/{selectModel.Id}");
         }
     }
 
