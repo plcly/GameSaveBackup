@@ -11,6 +11,9 @@
     <MudButton Class="ma-3" Variant="Variant.Filled" Color="Color.Primary" OnClick="() => OpenFolder(Model.GameSavePath)">打开游戏存档目录</MudButton>
 </MudStack>
 
+<MudStack Row>
+    <MudButton Class="ma-3" Variant="Variant.Filled" Color="Color.Primary" OnClick="RunGame">重新打开游戏</MudButton>
+</MudStack>
 
 <MudTimeline TimelinePosition="TimelinePosition.Start">
     @foreach (var gameDetail in Model.DisplayDetails)

@@ -36,6 +36,8 @@ namespace GameSaveManagement.pages
         [Inject]
         public GameService Service { get; set; }
         [Inject]
+        public EventBus EventBus { get; set; }
+        [Inject]
         public NavigationManager Navigation { get; set; }
 
         [Inject]
@@ -45,6 +47,7 @@ namespace GameSaveManagement.pages
 
         public ServerList()
         {
+
         }
 
         protected override void OnInitialized()
@@ -55,6 +58,9 @@ namespace GameSaveManagement.pages
         protected override async Task OnParametersSetAsync()
         {
             await base.OnParametersSetAsync();
+
+            EventBus.OnExitEvent += HandleLocationChanged;
+
             if (int.TryParse(GameModelId, out int modelId))
             {
                 _hotKeyManager = new HotKeyManager();
@@ -75,14 +81,20 @@ namespace GameSaveManagement.pages
                 }
 
                 _hotKeyManager.KeyPressed += HotKeyManagerPressed;
-                if (!string.IsNullOrEmpty(Model.GameFullPath))
-                {
-                    var info =new ProcessStartInfo(Model.GameFullPath);
-                    info.CreateNoWindow = true;
-                    info.UseShellExecute = false;
-                    info.WorkingDirectory = System.IO.Path.GetDirectoryName(Model.GameFullPath);
-                    using Process process = Process.Start(info);
-                }
+
+                RunGame();
+            }
+        }
+
+        private void RunGame()
+        {
+            if (!string.IsNullOrEmpty(Model.GameFullPath))
+            {
+                var info = new ProcessStartInfo(Model.GameFullPath);
+                info.CreateNoWindow = true;
+                info.UseShellExecute = false;
+                info.WorkingDirectory = System.IO.Path.GetDirectoryName(Model.GameFullPath);
+                using Process process = Process.Start(info);
             }
         }
 
@@ -142,7 +154,7 @@ namespace GameSaveManagement.pages
             await RefreshPage();
         }
 
-        private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+        private void HandleLocationChanged(object? sender, EventArgs e)
         {
             _hotKeyManager.Dispose();
         }

@@ -16,17 +16,30 @@ namespace GameSaveManagement
     /// </summary>
     public partial class App : Application
     {
+        EventBus _bus;
+
+        public App()
+        {
+            _bus = new EventBus();
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             var gameService = new GameService();
-
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddWpfBlazorWebView();
             serviceCollection.AddMudServices();
             serviceCollection.AddSingleton<IServiceCollection>(serviceCollection);
             serviceCollection.AddSingleton<GameService>(gameService);
+            serviceCollection.AddSingleton<EventBus>(_bus);
             var provider = serviceCollection.BuildServiceProvider();
             Resources.Add("services", provider);
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            _bus.OnExit(this, e);
+            base.OnExit(e);
         }
     }
 }
