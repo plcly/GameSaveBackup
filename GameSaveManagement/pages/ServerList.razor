@@ -1,6 +1,14 @@
 ﻿@page "/GameList/{GameModelId}"
 
-
+<MudStack Row>
+    <MudText Typo="Typo.h6" Class="ma-3">
+        当前游戏：
+    </MudText>
+    <div Class="d-flex">
+        <MudImage Class="d-inline align-self-center" Src="@Model.GameIconPath" Height="32" Width="32"></MudImage>
+        <MudText Class="d-inline ml-3 align-self-center">@Model.GameName</MudText>
+    </div>
+</MudStack>
 <MudStack Row>
     <MudText Typo="Typo.h6" Class="ma-3">快速保存快捷键：@Model.GameSaveHotKey</MudText>
     <MudButton Class="ma-3" Variant="Variant.Filled" Color="Color.Primary" OnClick="() => OpenFolder(Model.GameBackupPath)">打开备份存档目录</MudButton>

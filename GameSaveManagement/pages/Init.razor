@@ -64,6 +64,7 @@
     {
         try
         {
+            selectModel.RemoveQuote();
             var id = _service.InsertOrUpdate(selectModel);
             if (id > 0)
             {

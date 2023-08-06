@@ -41,5 +41,11 @@ namespace GameSaveManagement
             _bus.OnExit(this, e);
             base.OnExit(e);
         }
+
+        //private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        //{
+        //    MessageBox.Show(e.Exception.Message, "错误！", MessageBoxButton.OK, MessageBoxImage.Error);
+        //    e.Handled = true;
+        //}
     }
 }

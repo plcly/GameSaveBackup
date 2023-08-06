@@ -1,4 +1,5 @@
-﻿using GlobalHotKey;
+﻿using GameSaveManagement.Services;
+using GlobalHotKey;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,14 @@ namespace GameSaveManagement.Model
         public List<GameDetail> GameDetails { get; set; }
         [LiteDB.BsonIgnore]
         public List<GameDetail> DisplayDetails { get; set; }
+
+        public void RemoveQuote()
+        {
+            GameFullPath = GameFullPath.RemoveQuote();
+            GameSavePath = GameSavePath.RemoveQuote();
+            GameBackupPath = GameBackupPath.RemoveQuote();
+            GameIconPath = GameIconPath.RemoveQuote();
+        }
     }
     public class GameDetail
     {
