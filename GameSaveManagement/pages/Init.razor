@@ -41,13 +41,17 @@
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="rounded-lg" OnClick="Save">保存</MudButton>
             </MudItem>
             <MudItem xs="6">
+                <MudStack row>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="rounded-lg" OnClick="Run">启动</MudButton>
+                    <MudCheckBox @bind-Checked="@startGame" Label="启动游戏" Color="Color.Primary"></MudCheckBox>
+                </MudStack>
             </MudItem>
         </MudGrid>
     </MudItem>
 </MudGrid>
 @code {
     private string key;
+    private bool startGame = true;
     private MudList savedGameListCon;
     private List<GameModel> gameModels;
     private object selectedValue;
@@ -96,7 +100,7 @@
     {
         if (selectedValue != null && selectModel.Id > 0)
         {
-            Navigation.NavigateTo($"/GameList/{selectModel.Id}");
+            Navigation.NavigateTo($"/GameList/{selectModel.Id}/{startGame}");
         }
     }
 

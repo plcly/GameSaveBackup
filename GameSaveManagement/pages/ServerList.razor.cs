@@ -31,7 +31,10 @@ namespace GameSaveManagement.pages
         private string folderToBeRenamed;
 
         [Parameter]
-        public string GameModelId { get; set; }
+        public int? GameModelId { get; set; }
+
+        [Parameter]
+        public bool StartGame { get; set; }
 
         [Inject]
         public GameService Service { get; set; }
@@ -61,10 +64,10 @@ namespace GameSaveManagement.pages
 
             EventBus.OnExitEvent += HandleLocationChanged;
 
-            if (int.TryParse(GameModelId, out int modelId))
+            if (GameModelId.HasValue)
             {
                 _hotKeyManager = new HotKeyManager();
-                Model = InitByModelId(modelId);
+                Model = InitByModelId(GameModelId.Value);
                 if (Model == null)
                 {
                     return;
@@ -82,7 +85,10 @@ namespace GameSaveManagement.pages
 
                 _hotKeyManager.KeyPressed += HotKeyManagerPressed;
 
-                RunGame();
+                if (StartGame)
+                {
+                    RunGame();
+                }
             }
         }
 
