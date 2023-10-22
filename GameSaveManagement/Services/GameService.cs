@@ -44,6 +44,15 @@ namespace GameSaveManagement.Services
             return model.Id;
         }
 
+        public bool Delete(GameModel model)
+        {
+            if (model.Id > 0)
+            {
+               return _liteDb.Delete(model);
+            }
+            return false;
+        }
+
         private void CopyDirectory(string sourceDir, string destinationDir, bool recursive)
         {
             // Get information about the source directory

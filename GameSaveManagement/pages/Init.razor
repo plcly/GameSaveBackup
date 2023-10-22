@@ -37,8 +37,11 @@
             </MudItem>
         </MudGrid>
         <MudGrid Class="mt-10">
-            <MudItem xs="6">
+            <MudItem xs="3">
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="rounded-lg" OnClick="Save">保存</MudButton>
+            </MudItem>
+            <MudItem xs="3">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="rounded-lg" OnClick="Delete">删除</MudButton>
             </MudItem>
             <MudItem xs="6">
                 <MudStack row>
@@ -81,6 +84,23 @@
         }
     }
 
+    private async Task Delete()
+    {
+        try
+        {
+            selectModel.RemoveQuote();
+            var deleteStatus = _service.Delete(selectModel);
+            if (deleteStatus)
+            {
+                selectedValue = null;
+                await RefreshPage();
+            }
+        }
+        catch (Exception ex)
+        {
+            DialogService.ShowMessageBox("Warning!", ex.Message);
+        }
+    }
 
     private async Task RefreshPage()
     {
