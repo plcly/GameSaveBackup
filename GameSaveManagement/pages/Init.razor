@@ -36,6 +36,14 @@
                 <MudTextField Label="快速读取存档快捷键" T="string" @bind-Value="selectModel.GameLoadHotKey"></MudTextField>
             </MudItem>
         </MudGrid>
+        <MudGrid>
+            <MudItem xs="6">
+                <MudTextField Label="自动保存时间（分钟）" T="int" @bind-Value="selectModel.AutoSaveMinutes"></MudTextField>
+            </MudItem>
+            <MudItem xs="6">
+                <MudCheckBox @bind-Value="selectModel.AutoSave" Label="是否自动保存" T="bool" Color="Color.Primary"></MudCheckBox>
+            </MudItem>
+        </MudGrid>
         <MudGrid Class="mt-10">
             <MudItem xs="3">
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="rounded-lg" OnClick="Save">保存</MudButton>
@@ -46,7 +54,7 @@
             <MudItem xs="6">
                 <MudStack row>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="rounded-lg" OnClick="Run">启动</MudButton>
-                    <MudCheckBox @bind-Checked="@startGame" Label="启动游戏" Color="Color.Primary"></MudCheckBox>
+                    <MudCheckBox @bind-Value="@startGame" T="bool" Label="启动游戏" Color="Color.Primary"></MudCheckBox>
                 </MudStack>
             </MudItem>
         </MudGrid>

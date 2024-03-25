@@ -18,6 +18,8 @@ namespace GameSaveManagement.Model
         public string GameIconPath { get; set; }
         public string GameSaveHotKey { get; set; }
         public string GameLoadHotKey { get; set; }
+        public int AutoSaveMinutes { get; set; } = 5;
+        public bool AutoSave { get; set; }
         public List<GameDetail> GameDetails { get; set; }
         [LiteDB.BsonIgnore]
         public List<GameDetail> DisplayDetails { get; set; }

@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Windows.Shapes;
+using System.Threading;
+using System.Timers;
 
 namespace GameSaveManagement.pages
 {
@@ -29,6 +31,8 @@ namespace GameSaveManagement.pages
         private string hotKeyStr;
 
         private string folderToBeRenamed;
+
+        private System.Timers.Timer _timer;
 
         [Parameter]
         public int? GameModelId { get; set; }
@@ -72,6 +76,13 @@ namespace GameSaveManagement.pages
                 {
                     return;
                 }
+
+                _timer = new System.Timers.Timer();
+                _timer.Elapsed += AutoSave;
+                _timer.Interval = Model.AutoSaveMinutes * 60 * 1000;
+                _timer.Start();
+
+
                 if (!string.IsNullOrEmpty(Model.GameSaveHotKey)
                     && Enum.TryParse<Key>(Model.GameSaveHotKey, out Key saveKey))
                 {
@@ -163,6 +174,19 @@ namespace GameSaveManagement.pages
         private void HandleLocationChanged(object? sender, EventArgs e)
         {
             _hotKeyManager.Dispose();
+            if (_timer != null)
+            {
+                _timer.Close();
+            }
+        }
+
+        private void AutoSave(object? sender, ElapsedEventArgs e)
+        {
+            if (Service != null && Model != null)
+            {
+                Service.SaveGame(Model, false);
+                RefreshPage().Wait();
+            }
         }
 
         private void OpenDialog(string folderName)
@@ -187,7 +211,7 @@ namespace GameSaveManagement.pages
                 if (hotKeyStr == Model.GameSaveHotKey || hotKeyStr == Model.GameLoadHotKey
                     || Model.GameDetails.Where(p => p.HotKey != null).Any(p => p.HotKey.Key.ToString() == hotKeyStr))
                 {
-                    MudDialogService.ShowMessageBox("错误", "快捷键重复", yesText: "确定");
+                    await MudDialogService.ShowMessageBox("错误", "快捷键重复", yesText: "确定");
                     return;
                 }
                 var hotKeyExist = Enum.TryParse<Key>(hotKeyStr, out Key hotKey);

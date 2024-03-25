@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net7.0-windows</TargetFramework>
+		<TargetFramework>net8.0-windows</TargetFramework>
 		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
 		<RootNamespace>GameSaveManagement</RootNamespace>
@@ -27,9 +27,9 @@
 
 	<ItemGroup>
 		<PackageReference Include="GlobalHotKey" Version="1.1.0" />
-		<PackageReference Include="LiteDB" Version="5.0.16" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebView.Wpf" Version="7.0.86" />
-		<PackageReference Include="MudBlazor" Version="6.5.0" />
+		<PackageReference Include="LiteDB" Version="5.0.19" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebView.Wpf" Version="8.0.14" />
+		<PackageReference Include="MudBlazor" Version="6.19.1" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -131,7 +131,7 @@ namespace GameSaveManagement.Services
             return model;
         }
 
-        public void SaveGame(GameModel model)
+        public void SaveGame(GameModel model, bool playSound = true)
         {
             if (!Directory.Exists(model.GameBackupPath))
             {
@@ -147,7 +147,10 @@ namespace GameSaveManagement.Services
                 return;
             }
             CopyDirectory(model.GameSavePath, newFolderName, true);
-            PlaySound(_saveWav, new System.IntPtr(), PlaySoundFlags.SND_SYNC);
+            if (playSound)
+            {
+                PlaySound(_saveWav, new System.IntPtr(), PlaySoundFlags.SND_SYNC);
+            }
         }
 
         public void LoadGame(GameModel model, string path = null)
