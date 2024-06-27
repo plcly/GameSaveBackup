@@ -18,6 +18,7 @@ namespace GameSaveManagement.Services
         private LiteDbService _liteDb;
         private string _loadWav;
         private string _saveWav;
+        private static readonly string _autoSavePathName = "AutoSave";
 
         public GameService()
         {
@@ -48,7 +49,7 @@ namespace GameSaveManagement.Services
         {
             if (model.Id > 0)
             {
-               return _liteDb.Delete(model);
+                return _liteDb.Delete(model);
             }
             return false;
         }
@@ -106,7 +107,7 @@ namespace GameSaveManagement.Services
             var folderInfo = new DirectoryInfo(model.GameBackupPath);
             if (folderInfo.Exists)
             {
-                var folders = folderInfo.GetDirectories().OrderByDescending(p => p.LastWriteTime);
+                var folders = folderInfo.GetDirectories().Where(p => p.Name != _autoSavePathName).OrderByDescending(p => p.LastWriteTime);
 
                 var notExistsFolders = model.GameDetails.Where(p => !folders.Any(q => q.Name == p.FolderName)).Select(p => p.FolderName).ToList();
 
@@ -124,20 +125,24 @@ namespace GameSaveManagement.Services
                     {
                         continue;
                     }
-                    model.DisplayDetails.Add(new GameDetail { FolderName = folder.Name});
+                    model.DisplayDetails.Add(new GameDetail { FolderName = folder.Name });
                 }
             }
 
             return model;
         }
 
-        public void SaveGame(GameModel model, bool playSound = true)
+        public void SaveGame(GameModel model, bool playSound = true, bool autoSave = false)
         {
             if (!Directory.Exists(model.GameBackupPath))
             {
                 Directory.CreateDirectory(model.GameBackupPath);
             }
             var newFolderName = model.GameBackupPath + "\\" + DateTime.Now.ToString("yyyyMMdd-HH-mm-ss");
+            if (autoSave)
+            {
+                newFolderName = Path.Combine(model.GameBackupPath, _autoSavePathName, DateTime.Now.ToString("yyyyMMdd-HH-mm-ss"));
+            }
             if (!Directory.Exists(newFolderName))
             {
                 Directory.CreateDirectory(newFolderName);
@@ -169,7 +174,7 @@ namespace GameSaveManagement.Services
                 }
                 else
                 {
-                    backupFolder = folderInfo.GetDirectories().OrderByDescending(p => p.LastWriteTime).FirstOrDefault();
+                    backupFolder = folderInfo.GetDirectories().Where(p => p.Name != _autoSavePathName).OrderByDescending(p => p.LastWriteTime).FirstOrDefault();
                 }
                 if (backupFolder != null)
                 {

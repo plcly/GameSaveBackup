@@ -76,12 +76,13 @@ namespace GameSaveManagement.pages
                 {
                     return;
                 }
-
-                _timer = new System.Timers.Timer();
-                _timer.Elapsed += AutoSave;
-                _timer.Interval = Model.AutoSaveMinutes * 60 * 1000;
-                _timer.Start();
-
+                if (Model.AutoSave)
+                {
+                    _timer = new System.Timers.Timer();
+                    _timer.Elapsed += AutoSave;
+                    _timer.Interval = Model.AutoSaveMinutes * 60 * 1000;
+                    _timer.Start();
+                }
 
                 if (!string.IsNullOrEmpty(Model.GameSaveHotKey)
                     && Enum.TryParse<Key>(Model.GameSaveHotKey, out Key saveKey))
@@ -184,8 +185,7 @@ namespace GameSaveManagement.pages
         {
             if (Service != null && Model != null)
             {
-                Service.SaveGame(Model, false);
-                RefreshPage().Wait();
+                Service.SaveGame(Model, false, true);
             }
         }
 
